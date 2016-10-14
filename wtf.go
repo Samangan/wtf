@@ -32,7 +32,6 @@ func main() {
 				}
 
 				for _, thread := range threads {
-					fmt.Println("\n@@ " + thread.File + "  @@")
 					printThread(thread)
 				}
 				return nil
@@ -52,6 +51,7 @@ func spliceDiff(diff string, pos int) (string, string, error) {
 }
 
 func printThread(thread *thread.Thread) {
+	fmt.Println("\n@@ " + thread.File + "  @@")
 	first, second, _ := spliceDiff(thread.Diff, thread.Comments[0].Pos)
 	fmt.Println(first)
 
