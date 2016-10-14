@@ -12,12 +12,12 @@ diving through the code. That is the goal of wtf.
 If you do not set an environmental variable called `GITHUB_ACCESS_TOKEN` to yout github access api access token [See here](https://github.com/blog/1509-personal-api-tokens), then 
 you will be making unauthenticated Github API requests. This means you will only be able to make 60 requests per hour.
 
-### ls f
+### List comment threads for a file
 To view a list of all of the github threads for a file in your git repo then type:
-`wtf ls f $filepath` 
+`wtf ls $filepath` 
 
 For example:
-`wtf ls f src/main/scala/main.scala`
+`wtf ls src/main/scala/main.scala`
 
 ![Example output](http://i.imgur.com/yx5mVff.png)
 

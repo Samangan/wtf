@@ -21,51 +21,35 @@ func main() {
 		{
 			Name:    "ls",
 			Aliases: []string{"l"},
-			Usage:   "List threads",
-			Subcommands: []cli.Command{
-				{
-					Name:    "all",
-					Aliases: []string{"a"},
-					Usage:   "List all threads in project.",
-					Action: func(c *cli.Context) error {
-						// TODO: Implement
-						return nil
-					},
-				},
-				{
-					Name:    "file",
-					Aliases: []string{"f"},
-					Usage:   "List all threads for `fileName`",
-					Action: func(c *cli.Context) error {
-						// TODO: allow filename to be an absolute path as well as a relative path
-						filename := c.Args().First()
-						threads, err := thread.GetThreads(filename)
+			Usage:   "List all threads for `filename`",
+			Action: func(c *cli.Context) error {
+				// TODO: allow filename to be an absolute path as well as a relative path
+				filename := c.Args().First()
+				threads, err := thread.GetThreads(filename)
 
-						if err != nil {
-							log.Fatal(err)
-						}
+				if err != nil {
+					log.Fatal(err)
+				}
 
-						// TODO: Put below in a helper function to print out the threads to the console.
-						// * I should make a utility class maybe for the formatting and splicing stuff.
-						for _, thread := range threads {
-							fmt.Println("\n@@ " + thread.File + "  @@")
+				// TODO: Put below in a helper function to print out the threads to the console.
+				// * I should make a utility class maybe for the formatting and splicing stuff.
+				for _, thread := range threads {
+					fmt.Println("\n@@ " + thread.File + "  @@")
 
-							first, second, _ := spliceDiff(thread.Diff, thread.Comments[0].Pos)
-							fmt.Println(first)
-							lime := ansi.ColorCode("green+h:black")
-							reset := ansi.ColorCode("reset")
-							emoji.Println(lime, ":email: "+thread.Comments[0].Author+" [ "+thread.Comments[0].Date.String()+"] : "+thread.Comments[0].Body+"", reset)
+					first, second, _ := spliceDiff(thread.Diff, thread.Comments[0].Pos)
+					fmt.Println(first)
+					lime := ansi.ColorCode("green+h:black")
+					reset := ansi.ColorCode("reset")
+					emoji.Println(lime, ":email: "+thread.Comments[0].Author+" [ "+thread.Comments[0].Date.String()+"] : "+thread.Comments[0].Body+"", reset)
 
-							for _, comment := range thread.Comments[1:] {
-								emoji.Println(lime, "\\__ :email: "+comment.Author+" [ "+comment.Date.String()+"] : "+comment.Body+"", reset)
-							}
+					for _, comment := range thread.Comments[1:] {
+						emoji.Println(lime, "\\__ :email: "+comment.Author+" [ "+comment.Date.String()+"] : "+comment.Body+"", reset)
+					}
 
-							fmt.Println(second)
-						}
+					fmt.Println(second)
+				}
 
-						return nil
-					},
-				},
+				return nil
 			},
 		},
 	}
