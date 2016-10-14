@@ -140,5 +140,3 @@ func combineCommentsIntoThreads(comments []*github.RepositoryComment) map[string
 
 	return threadMap
 }
-
-// TODO: func GetAllThreads()

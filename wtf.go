@@ -31,24 +31,10 @@ func main() {
 					log.Fatal(err)
 				}
 
-				// TODO: Put below in a helper function to print out the threads to the console.
-				// * I should make a utility class maybe for the formatting and splicing stuff.
 				for _, thread := range threads {
 					fmt.Println("\n@@ " + thread.File + "  @@")
-
-					first, second, _ := spliceDiff(thread.Diff, thread.Comments[0].Pos)
-					fmt.Println(first)
-					lime := ansi.ColorCode("green+h:black")
-					reset := ansi.ColorCode("reset")
-					emoji.Println(lime, ":email: "+thread.Comments[0].Author+" [ "+thread.Comments[0].Date.String()+"] : "+thread.Comments[0].Body+"", reset)
-
-					for _, comment := range thread.Comments[1:] {
-						emoji.Println(lime, "\\__ :email: "+comment.Author+" [ "+comment.Date.String()+"] : "+comment.Body+"", reset)
-					}
-
-					fmt.Println(second)
+					printThread(thread)
 				}
-
 				return nil
 			},
 		},
@@ -63,4 +49,19 @@ func main() {
 func spliceDiff(diff string, pos int) (string, string, error) {
 	s := strings.SplitN(diff, "\n", -1)
 	return strings.Join(s[:pos+1], "\n"), strings.Join(s[pos+1:], "\n"), nil
+}
+
+func printThread(thread *thread.Thread) {
+	first, second, _ := spliceDiff(thread.Diff, thread.Comments[0].Pos)
+	fmt.Println(first)
+
+	lime := ansi.ColorCode("green+h:black")
+	reset := ansi.ColorCode("reset")
+
+	emoji.Println(lime, ":email: "+thread.Comments[0].Author+" [ "+thread.Comments[0].Date.String()+"] : "+thread.Comments[0].Body+"", reset)
+
+	for _, comment := range thread.Comments[1:] {
+		emoji.Println(lime, "\\__ :email: "+comment.Author+" [ "+comment.Date.String()+"] : "+comment.Body+"", reset)
+	}
+	fmt.Println(second)
 }
