@@ -2,9 +2,14 @@ package thread
 
 import (
 	"errors"
+	"fmt"
 	"github.com/google/go-github/github"
-	//	"golang.org/x/oauth2"
+	"golang.org/x/oauth2"
+	"log"
 	"net/http"
+	"os"
+	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -48,15 +53,12 @@ func GetThreads(fileName string) ([]*Thread, error) {
 			return nil, err
 		}
 
-		url := comments[0].Url
-		pos := comments[0].Pos
-
 		threads = append(threads, &Thread{
 			Comments: comments,
 			File:     fileName,
 			Diff:     diff,
-			Url:      url,
-			Pos:      pos,
+			Url:      comments[0].Url,
+			Pos:      comments[0].Pos,
 		})
 	}
 
@@ -67,20 +69,40 @@ func GetThreads(fileName string) ([]*Thread, error) {
 // repository that is currently in this working directory.
 // It uses `git remove -v` to find this information.
 func parseRepoName() (string, string) {
-	// TODO: Parse the repo name from `git remote -v`
-	return "Samangan", "owLint"
+	cmd := exec.Command("git", "remote", "-v")
+	out, err := cmd.Output()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	outStr := string(out[:])
+
+	// TODO: Below is hacky... Clean up:
+	parsedGitOutput := strings.Split(strings.Split(outStr, ":")[1], "/")
+	return parsedGitOutput[0], strings.Split(parsedGitOutput[1], ".git")[0]
 }
 
 // getGithubAuthenticatedClient retrieves the github access token from the `GITHUB_ACCESS_TOKEN` environmental
 // variable and then returns the authenticated client.
 // If no env variable exists then it will return nil and the unauthenticated client will still be used.
 func getGithubAuthenticatedClient() *http.Client {
-	// TODO: Implement (see github readme)
-	return nil
+	accessToken, tokenExists := os.LookupEnv("GITHUB_ACCESS_TOKEN")
+
+	if !tokenExists {
+		fmt.Println("`GITHUB_ACCESS_TOKEN` env variable not found. Using un-authenticated github API!")
+		return nil
+	}
+
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: accessToken},
+	)
+	return oauth2.NewClient(oauth2.NoContext, ts)
 }
 
 // getDiffFromCommit returns the github diff for this filename and commitId hash
 func getDiffFromCommit(owner string, repo string, commitId string, filename string) (string, error) {
+	// TODO: DRY UP the github client usage: (I should only have to init the github client and grab the env var once per command)
 	client := github.NewClient(getGithubAuthenticatedClient())
 	commit, _, err := client.Repositories.GetCommit(owner, repo, commitId)
 
